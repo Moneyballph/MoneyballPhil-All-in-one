@@ -24,11 +24,12 @@ def set_background(img_path):
     </style>
     """, unsafe_allow_html=True)
 
-# Change to your actual background path
+# Change this to your final logo background path
 set_background("assets/mbp_bg.png")
 
 # =========================
-# Hitter Hit Probability
+# Hitter Hit Probability Sim
+# (kept calculations exactly)
 # =========================
 def run_hitter_simulator():
     st.title("💰 Moneyball Phil: Hit Probability Simulator")
@@ -154,7 +155,8 @@ def run_hitter_simulator():
         st.info("Add at least 2 players to use the Parlay Builder.")
 
 # =========================
-# Pitcher Earned Runs
+# Pitcher Earned Runs Sim
+# (kept calculations exactly)
 # =========================
 def run_pitcher_er_simulator():
     st.title("🎯 Pitcher Earned Runs Simulator")
@@ -256,6 +258,7 @@ def run_pitcher_er_simulator():
 
 # =========================
 # NFL Prop Simulator (QB/WR/RB)
+# (kept calculations exactly)
 # =========================
 def run_nfl_simulator():
     st.title("🏈 Moneyball Phil: NFL Prop Simulator (v2.0)")
@@ -264,7 +267,7 @@ def run_nfl_simulator():
     if "all_props" not in st.session_state:
         st.session_state.all_props = []
 
-    # Helpers (exact)
+    # Helper functions (as provided)
     def implied_prob(odds):
         if odds < 0:
             return abs(odds) / (abs(odds) + 100)
@@ -298,7 +301,7 @@ def run_nfl_simulator():
                 return "🟢 Easy"
         return "Unknown"
 
-    # Quarterback
+    # Quarterback Module
     if position == "Quarterback":
         st.header("🎯 Quarterback Inputs")
         name = st.text_input("Quarterback Name", value="")
@@ -338,7 +341,7 @@ def run_nfl_simulator():
                 {"Player": name, "Prop": f"Under {td_line} Pass TDs", "True Prob": 100 - td_prob, "Odds": td_under_odds},
             ])
 
-    # Wide Receiver
+    # Wide Receiver Module
     if position == "Wide Receiver":
         st.header("🎯 Wide Receiver Inputs")
         name = st.text_input("Wide Receiver Name", value="")
@@ -381,7 +384,7 @@ def run_nfl_simulator():
                 {"Player": name, "Prop": f"Under {rec_line} Receptions", "True Prob": 100 - rec_prob, "Odds": rec_under_odds},
             ])
 
-    # Running Back
+    # Running Back Module
     if position == "Running Back":
         st.header("🎯 Running Back Inputs")
         name = st.text_input("Running Back Name", value="")
@@ -477,3 +480,5 @@ with tabs[1]:
 
 with tabs[2]:
     run_nfl_simulator()
+
+
