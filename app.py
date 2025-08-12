@@ -2,19 +2,15 @@ import streamlit as st
 import base64
 from pathlib import Path
 
-def set_background(img_rel_path: str = "assets/mbp_bg.png"):
+def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 600):
     """
-    Looks for the background image in multiple sensible places:
-    - as given (img_rel_path)
-    - relative to this file's folder
-    - '<file_dir>/assets/mbp_bg.png'
-    - '<file_dir>/mbp_bg.png'
-    Falls back to black if not found.
+    Displays a smaller, centered background/logo in the middle of the page.
+    `width` sets the max pixel width of the image.
     """
     file_dir = Path(__file__).parent.resolve()
     candidates = [
-        Path(img_rel_path),                        # as provided
-        file_dir / img_rel_path,                   # relative to this script
+        Path(img_rel_path),
+        file_dir / img_rel_path,
         file_dir / "assets" / "mbp_bg.png",
         file_dir / "mbp_bg.png",
     ]
@@ -22,9 +18,7 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png"):
     img_path = next((p for p in candidates if p.exists()), None)
 
     if not img_path:
-        st.warning("⚠️ Background image not found. Checked: " +
-                   ", ".join(str(p) for p in candidates) +
-                   ". Using plain black.")
+        st.warning("⚠️ Background image not found. Using plain black.")
         st.markdown("<style>.stApp{background:#000}</style>", unsafe_allow_html=True)
         return
 
@@ -35,19 +29,30 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png"):
         f"""
         <style>
         .stApp {{
-            background: url("data:image/png;base64,{b64}") center/cover no-repeat fixed;
+            background: #000; /* solid background so image stands out */
         }}
-        .stApp::before {{
-            content:""; position:fixed; inset:0;
-            background: rgba(0,0,0,0.18); z-index:-1;
+        .bg-logo {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            opacity: 0.12; /* faint so text is readable */
+        }}
+        .bg-logo img {{
+            max-width: {width}px;
+            height: auto;
         }}
         </style>
+        <div class="bg-logo">
+            <img src="data:image/png;base64,{b64}">
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-# call once, near the top of your file
-set_background("assets/mbp_bg.png")
+# call it once
+set_background("assets/mbp_bg.png", width=500)
 
 
 # =========================
