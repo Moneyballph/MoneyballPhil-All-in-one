@@ -48,7 +48,8 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, op
     )
 
 # Call it once in your app
-set_background("assets/mbp_bg.png", width=500, opacity=0.28)
+set_background("assets/mbp_bg.png", width=500, opacity=0.40)
+
 
 
 
