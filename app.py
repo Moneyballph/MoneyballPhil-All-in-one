@@ -2,59 +2,54 @@ import streamlit as st
 import base64
 from pathlib import Path
 
-st.set_page_config(page_title="Moneyball Phil All-in-One Simulator", layout="wide")
-
-def _find_file(candidates):
-    for p in candidates:
-        if p.exists():
-            return p
-    return None
-
-def set_background_smart(filename="mbp_bg.png"):
-    """Finds the image in common locations and applies it. Falls back to black with a clear warning."""
+def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, opacity: float = 0.15):
+    """
+    Displays a centered watermark logo on top of content.
+    """
     file_dir = Path(__file__).parent.resolve()
-    cwd = Path.cwd().resolve()
-
-    # Try likely locations
     candidates = [
-        Path(filename),                          # e.g. "mbp_bg.png" (same folder as app.py)
-        file_dir / filename,                     # app.py directory
-        file_dir / "assets" / filename,          # repo/assets/mbp_bg.png
-        cwd / filename,                          # current working dir
-        cwd / "assets" / filename,               # cwd/assets/mbp_bg.png
+        Path(img_rel_path),
+        file_dir / img_rel_path,
+        file_dir / "assets" / "mbp_bg.png",
+        file_dir / "mbp_bg.png",
     ]
 
-    img_path = _find_file(candidates)
-
-    # Optional: show debug info in sidebar
-    with st.sidebar.expander("🔎 Background debug", expanded=False):
-        st.write("Working dir:", str(cwd))
-        st.write("App dir:", str(file_dir))
-        st.write("Checked:", [str(p) for p in candidates])
-        st.write("Found:", str(img_path) if img_path else "None")
+    img_path = next((p for p in candidates if p.exists()), None)
 
     if not img_path:
-        st.warning("⚠️ Background image not found. Using plain black.")
-        st.markdown("<style>.stApp{background:#000}</style>", unsafe_allow_html=True)
+        st.warning("⚠️ Background image not found.")
         return
 
-    b64 = base64.b64encode(img_path.read_bytes()).decode()
+    with open(img_path, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+
     st.markdown(
         f"""
         <style>
-        .stApp {{
-            background: url("data:image/png;base64,{b64}") center no-repeat fixed;
-            background-size: contain; /* not full-screen; shows full image */
-            background-color: #000;   /* fallback color */
+        .bg-logo {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999; /* stays on top of content */
+            opacity: {opacity};
+            pointer-events: none; /* allows clicking through */
+        }}
+        .bg-logo img {{
+            max-width: {width}px;
+            height: auto;
         }}
         </style>
+        <div class="bg-logo">
+            <img src="data:image/png;base64,{b64}">
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-# 👉 Call this once. Choose the name you actually used.
-# If your file is in assets/, keep as below; if it's next to app.py, change to "mbp_bg.png"
-set_background_smart("assets/mbp_bg.png")
+# Call it once in your app
+set_background("assets/mbp_bg.png", width=500, opacity=0.40)
+
 
 
 
