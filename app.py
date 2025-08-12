@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import math
 import base64
+from pathlib import Path
 from scipy.stats import poisson
 
 # =========================
@@ -9,27 +10,46 @@ from scipy.stats import poisson
 # =========================
 st.set_page_config(page_title="Moneyball Phil All-in-One Simulator", layout="wide")
 
-def set_background(img_path):
-    with open(img_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
-    st.markdown(f"""
-    <style>
-    .stApp {{
-        background: url("data:image/png;base64,{b64}") center/cover no-repeat fixed;
-    }}
-    .stApp::before {{
-        content:""; position:fixed; inset:0;
-        background: rgba(0,0,0,0.18); z-index:-1;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+def set_background(img_path: str):
+    """
+    Sets the background image. Falls back to plain black if missing.
+    """
+    p = Path(img_path)
+    if not p.exists():
+        st.warning(f"⚠️ Background not found at {img_path}. Using plain black.")
+        st.markdown(
+            """
+            <style>
+            .stApp { background-color: #000000; }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
 
-# Change this to your final logo background path
+    with open(p, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: url("data:image/png;base64,{b64}") center/cover no-repeat fixed;
+        }}
+        .stApp::before {{
+            content:""; position:fixed; inset:0;
+            background: rgba(0,0,0,0.18); z-index:-1;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ✅ call once, globally
 set_background("assets/mbp_bg.png")
 
 # =========================
 # Hitter Hit Probability Sim
-# (kept calculations exactly)
 # =========================
 def run_hitter_simulator():
     st.title("💰 Moneyball Phil: Hit Probability Simulator")
@@ -77,7 +97,6 @@ def run_hitter_simulator():
         weighted_avg = calculate_weighted_avg(season_avg, last7_avg, split_avg, hand_avg, pitcher_avg)
 
         # Pitcher Difficulty Adjustment
-        adjustment = 0
         if pitcher_whip >= 1.40 or pitcher_era >= 5.00:
             adjustment = 0.020
             tier = "🟢 Easy Pitcher"
@@ -128,7 +147,6 @@ def run_hitter_simulator():
         selected = st.multiselect("Select 2 or 3 Players", names)
         if len(selected) in [2, 3]:
             probs = [p["true_prob"] for p in st.session_state.players if p["name"] in selected]
-            implieds = [p["implied_prob"] for p in st.session_state.players if p["name"] in selected]
             parlay_true = round(pd.Series(probs).prod(), 4)
 
             st.markdown("### 📉 Sportsbook Parlay Odds Input")
@@ -156,7 +174,6 @@ def run_hitter_simulator():
 
 # =========================
 # Pitcher Earned Runs Sim
-# (kept calculations exactly)
 # =========================
 def run_pitcher_er_simulator():
     st.title("🎯 Pitcher Earned Runs Simulator")
@@ -258,7 +275,6 @@ def run_pitcher_er_simulator():
 
 # =========================
 # NFL Prop Simulator (QB/WR/RB)
-# (kept calculations exactly)
 # =========================
 def run_nfl_simulator():
     st.title("🏈 Moneyball Phil: NFL Prop Simulator (v2.0)")
@@ -449,16 +465,13 @@ def run_nfl_simulator():
 
         if selected and len(selected) >= 2:
             selected_props = [p for p in st.session_state.all_props if f"{p['Player']} – {p['Prop']}" in selected]
-
             combined_prob = 1
             combined_ev = 0
             for p in selected_props:
                 combined_prob *= p["True Prob"] / 100
                 combined_ev += ev_calc(p["True Prob"] / 100, p["Odds"])
-
             combined_prob = round(combined_prob * 100, 2)
             avg_ev = round(combined_ev / len(selected_props), 2)
-
             st.success(f"Parlay Hit Probability: `{combined_prob}%` | Avg EV: `{avg_ev}%`")
     else:
         st.info("Add at least 2 simulated props to enable the parlay builder.")
@@ -480,5 +493,6 @@ with tabs[1]:
 
 with tabs[2]:
     run_nfl_simulator()
+
 
 
