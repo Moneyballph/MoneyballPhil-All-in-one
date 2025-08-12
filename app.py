@@ -4,7 +4,7 @@ from pathlib import Path
 
 def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, opacity: float = 0.15):
     """
-    Displays a centered watermark logo on top of content.
+    Displays a centered watermark logo with black background removed using CSS blend.
     """
     file_dir = Path(__file__).parent.resolve()
     candidates = [
@@ -31,13 +31,14 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, op
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 999; /* stays on top of content */
+            z-index: 999;
             opacity: {opacity};
-            pointer-events: none; /* allows clicking through */
+            pointer-events: none;
         }}
         .bg-logo img {{
             max-width: {width}px;
             height: auto;
+            mix-blend-mode: screen; /* removes black background on dark themes */
         }}
         </style>
         <div class="bg-logo">
