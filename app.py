@@ -1,33 +1,34 @@
 import streamlit as st
-import pandas as pd
-import math
 import base64
 from pathlib import Path
-from scipy.stats import poisson
 
-# =========================
-# Global Config + Background
-# =========================
-st.set_page_config(page_title="Moneyball Phil All-in-One Simulator", layout="wide")
+def set_background(img_rel_path: str = "assets/mbp_bg.png"):
+    """
+    Looks for the background image in multiple sensible places:
+    - as given (img_rel_path)
+    - relative to this file's folder
+    - '<file_dir>/assets/mbp_bg.png'
+    - '<file_dir>/mbp_bg.png'
+    Falls back to black if not found.
+    """
+    file_dir = Path(__file__).parent.resolve()
+    candidates = [
+        Path(img_rel_path),                        # as provided
+        file_dir / img_rel_path,                   # relative to this script
+        file_dir / "assets" / "mbp_bg.png",
+        file_dir / "mbp_bg.png",
+    ]
 
-def set_background(img_path: str):
-    """
-    Sets the background image. Falls back to plain black if missing.
-    """
-    p = Path(img_path)
-    if not p.exists():
-        st.warning(f"⚠️ Background not found at {img_path}. Using plain black.")
-        st.markdown(
-            """
-            <style>
-            .stApp { background-color: #000000; }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+    img_path = next((p for p in candidates if p.exists()), None)
+
+    if not img_path:
+        st.warning("⚠️ Background image not found. Checked: " +
+                   ", ".join(str(p) for p in candidates) +
+                   ". Using plain black.")
+        st.markdown("<style>.stApp{background:#000}</style>", unsafe_allow_html=True)
         return
 
-    with open(p, "rb") as f:
+    with open(img_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
 
     st.markdown(
@@ -45,8 +46,9 @@ def set_background(img_path: str):
         unsafe_allow_html=True,
     )
 
-# ✅ call once, globally
+# call once, near the top of your file
 set_background("assets/mbp_bg.png")
+
 
 # =========================
 # Hitter Hit Probability Sim
