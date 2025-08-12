@@ -24,30 +24,31 @@ def set_logo_overlay(img_rel_path: str = "assets/mbp_logo_transparent.png", widt
     with open(img_path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode()
 
-    st.markdown(
-        f"""
-        <style>
-        .mbp-logo-overlay {{
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: {z_index};
-            opacity: {opacity};
-            pointer-events: none; /* don't block clicks */
-        }}
-        .mbp-logo-overlay img {{
-            max-width: {width}px;
-            height: auto;
-            display: block;
-        }}
-        </style>
-        <div class="mbp-logo-overlay">
-          <img src="data:image/png;base64,{b64}" />
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+st.markdown(
+    f"""
+    <style>
+    .mbp-logo-overlay {{
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: {z_index};
+        pointer-events: none; /* don't block clicks */
+    }}
+    .mbp-logo-overlay img {{
+        max-width: {width}px;
+        height: auto;
+        display: block;
+        filter: brightness(1.2); /* Brightens the logo slightly */
+    }}
+    </style>
+    <div class="mbp-logo-overlay">
+      <img src="data:image/png;base64,{b64}" />
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # Call once, near the top of app.py (after st.set_page_config)
 # set_logo_overlay("assets/mbp_logo_transparent.png", width=520, opacity=0.40)
