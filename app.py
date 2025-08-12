@@ -2,10 +2,9 @@ import streamlit as st
 import base64
 from pathlib import Path
 
-def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 600):
+def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, opacity: float = 0.15):
     """
-    Displays a smaller, centered background/logo in the middle of the page.
-    `width` sets the max pixel width of the image.
+    Displays a centered watermark logo on top of content.
     """
     file_dir = Path(__file__).parent.resolve()
     candidates = [
@@ -18,8 +17,7 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 600):
     img_path = next((p for p in candidates if p.exists()), None)
 
     if not img_path:
-        st.warning("⚠️ Background image not found. Using plain black.")
-        st.markdown("<style>.stApp{background:#000}</style>", unsafe_allow_html=True)
+        st.warning("⚠️ Background image not found.")
         return
 
     with open(img_path, "rb") as f:
@@ -28,16 +26,14 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 600):
     st.markdown(
         f"""
         <style>
-        .stApp {{
-            background: #000; /* solid background so image stands out */
-        }}
         .bg-logo {{
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: -1;
-            opacity: 0.12; /* faint so text is readable */
+            z-index: 999; /* stays on top of content */
+            opacity: {opacity};
+            pointer-events: none; /* allows clicking through */
         }}
         .bg-logo img {{
             max-width: {width}px;
@@ -51,8 +47,8 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 600):
         unsafe_allow_html=True,
     )
 
-# call it once
-set_background("assets/mbp_bg.png", width=500)
+# Call it once in your app
+set_background("assets/mbp_bg.png", width=500, opacity=0.18)
 
 
 # =========================
