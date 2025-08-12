@@ -2,22 +2,23 @@ import streamlit as st
 import base64
 from pathlib import Path
 
-def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, opacity: float = 0.15):
+def set_logo_overlay(img_rel_path: str = "assets/mbp_logo_transparent.png", width: int = 500, opacity: float = 0.35, z_index: int = 999):
     """
-    Displays a centered watermark logo on top of content.
+    Places a transparent-logo watermark centered on top of the app.
+    - width: max pixel width of the logo
+    - opacity: 0.0 to 1.0
+    - z_index: higher stays above more UI layers
     """
     file_dir = Path(__file__).parent.resolve()
     candidates = [
         Path(img_rel_path),
         file_dir / img_rel_path,
-        file_dir / "assets" / "mbp_bg.png",
-        file_dir / "mbp_bg.png",
+        file_dir / "assets" / Path(img_rel_path).name,
+        file_dir / Path(img_rel_path).name,
     ]
-
     img_path = next((p for p in candidates if p.exists()), None)
-
     if not img_path:
-        st.warning("⚠️ Background image not found.")
+        st.warning("Logo overlay not found. Skipping watermark.")
         return
 
     with open(img_path, "rb") as f:
@@ -26,29 +27,30 @@ def set_background(img_rel_path: str = "assets/mbp_bg.png", width: int = 500, op
     st.markdown(
         f"""
         <style>
-        .bg-logo {{
+        .mbp-logo-overlay {{
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 999; /* stays on top of content */
+            z-index: {z_index};
             opacity: {opacity};
-            pointer-events: none; /* allows clicking through */
+            pointer-events: none; /* don't block clicks */
         }}
-        .bg-logo img {{
+        .mbp-logo-overlay img {{
             max-width: {width}px;
             height: auto;
+            display: block;
         }}
         </style>
-        <div class="bg-logo">
-            <img src="data:image/png;base64,{b64}">
+        <div class="mbp-logo-overlay">
+          <img src="data:image/png;base64,{b64}" />
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# Call it once in your app
-set_background("assets/mbp_bg.png", width=500, opacity=0.40)
+# Call once, near the top of app.py (after st.set_page_config)
+# set_logo_overlay("assets/mbp_logo_transparent.png", width=520, opacity=0.40)
 
 
 
